@@ -1,0 +1,92 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/CHANGELOG.md
+@@ -0,0 +1,23 @@
++# Changelog — Expense Tracker v2
++
++## 2025-08-23
++- Base v2 structure (Vite + React), tabs UI.
++- Features: Dashboard, AddExpense, Expenses, Reports (CSV export), Settings (cycle day, categories/budgets, backup/restore JSON), Recurring (manual + auto-apply on startup).
++- LocalStorage-first engine with swap-ready API for SQLite (sql.js via npm) later.
++- Disabled PWA for now (manifest to add later).
++- Recharts used on Dashboard (install via `npm i recharts`).
++
++## Next
++- Polish Recurring (edit/update templates).
++- SQLite (sql.js via npm) enablement + one-time migration from LocalStorage.
++- PWA manifest + icons + offline cache strategy.
+diff --git a/docs/assistant-notes.md b/docs/assistant-notes.md
+new file mode 100644
+index 0000000..2222222
+--- /dev/null
++++ b/docs/assistant-notes.md
+@@ -0,0 +1,37 @@
++# Assistant Notes
++
++**Repo:** https://github.com/totsaphonk/Expense-Tracker-v2
++**Timezone:** Asia/Bangkok
++**Language:** TH
++
++## Architecture
++- Vite + React. LocalStorage-first data engine (`getEngine()` abstraction).
++- Future: switch to SQLite (sql.js via npm, with `public/sql-wasm.wasm`).
++- PWA disabled for now (`virtual:pwa-register` commented).
++
++## Implemented
++- Dashboard, AddExpense, Expenses
++- Reports: cycle/custom range, totals by category, CSV export
++- Settings: cycle start day, categories & budgets, backup/restore JSON
++- Recurring: template list, manual apply, **auto-apply on startup**
++
++## Workflow
++- User prefers **Thai** instructions & step-by-step.
++- Changes delivered via **patch** or **full files** to paste.
++
++## Conventions
++- Keep hooks order stable in components.
++- Avoid CDN for sql.js; use npm package later.
++- Keep `engine.js` API stable for engine swap.
++
++## Next ideas
++- Recurring edit UI, color-picker for categories.
++- Export/Import SQLite (.sqlite) once db enabled.
++- PWA manifest + app icons.
+diff --git a/docs/assistant-state.json b/docs/assistant-state.json
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/docs/assistant-state.json
+@@ -0,0 +1,38 @@
++{
++  "project": "Expense Tracker v2",
++  "repo": "https://github.com/totsaphonk/Expense-Tracker-v2",
++  "timezone": "Asia/Bangkok",
++  "language": "th",
++  "stack": {
++    "frontend": "Vite + React",
++    "charts": "Recharts",
++    "persistence": "LocalStorage-first; SQLite (sql.js via npm) planned",
++    "pwa": "disabled for now"
++  },
++  "features_done": [
++    "Dashboard",
++    "AddExpense",
++    "Expenses",
++    "Reports (CSV export, cycle/custom)",
++    "Settings (cycle start, categories/budgets, backup/restore JSON)",
++    "Recurring (manual apply + auto-apply at startup)"
++  ],
++  "decisions": [
++    "Avoid sql.js via CDN; switch to npm + local wasm later",
++    "Keep engine API stable for easy swap",
++    "Use patches or full files for changes"
++  ],
++  "next_tasks": [
++    "Recurring: edit/update templates",
++    "SQLite enablement + migration",
++    "PWA manifest & icons"
++  ],
++  "last_updated": "2025-08-23"
++}

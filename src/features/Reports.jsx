@@ -8,16 +8,20 @@ const thb = new Intl.NumberFormat("th-TH", {
   maximumFractionDigits: 2,
 });
 
-function toISO(d) { return new Date(d).toISOString().slice(0, 10); }
+function toISO(d) {
+  return new Date(d).toISOString().slice(0, 10);
+}
 
 export default function Reports() {
   const { ready, settings, categories, expenses, getCycleRange } = useApp();
-  const [mode, setMode] = useState("cycle"); // 'cycle' | 'custom'
+  const [mode, setMode] = useState("cycle");
   const [custom, setCustom] = useState({
     from: toISO(new Date()),
     to: toISO(new Date()),
   });
   const [cycleOffset, setCycleOffset] = useState(0);
+
+  const locale = settings?.locale || "th-TH";
 
   const range = useMemo(() => {
     if (mode === "cycle") {
@@ -45,7 +49,12 @@ export default function Reports() {
   const rows = useMemo(() => {
     const map = new Map();
     categories.forEach((c) =>
-      map.set(c.id, { categoryId: c.id, name: c.name, budget: Number(c.budget || 0), spent: 0 })
+      map.set(c.id, {
+        categoryId: c.id,
+        name: c.name,
+        budget: Number(c.budget || 0),
+        spent: 0,
+      })
     );
     filtered.forEach((e) => {
       const row = map.get(e.categoryId);
@@ -90,21 +99,28 @@ export default function Reports() {
     URL.revokeObjectURL(a.href);
   }
 
-  const periodLabel = `${new Date(range.from).toLocaleDateString("th-TH")} - ${new Date(range.to).toLocaleDateString("th-TH")}`;
+  const periodLabel = `${new Date(range.from).toLocaleDateString(
+    locale
+  )} - ${new Date(range.to).toLocaleDateString(locale)}`;
 
   return (
     <section className="mt-4 space-y-4">
-      {/* Controls */}
       <div className="rounded-2xl border bg-white p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-sm">โหมดรายงาน:</label>
+          <label className="text-sm">
+            {locale === "en-US" ? "Report mode:" : "โหมดรายงาน:"}
+          </label>
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value)}
             className="border rounded-xl px-3 py-2"
           >
-            <option value="cycle">ตามรอบตัดงบ</option>
-            <option value="custom">ช่วงวันที่กำหนดเอง</option>
+            <option value="cycle">
+              {locale === "en-US" ? "By cycle" : "ตามรอบตัดงบ"}
+            </option>
+            <option value="custom">
+              {locale === "en-US" ? "Custom range" : "ช่วงวันที่กำหนดเอง"}
+            </option>
           </select>
         </div>
 
@@ -113,7 +129,7 @@ export default function Reports() {
             <button
               onClick={() => setCycleOffset((v) => v + 1)}
               className="px-3 py-2 border rounded-xl"
-              title="ย้อนรอบก่อนหน้า"
+              title={locale === "en-US" ? "Previous cycle" : "ย้อนรอบก่อนหน้า"}
             >
               ◀
             </button>
@@ -121,7 +137,7 @@ export default function Reports() {
             <button
               onClick={() => setCycleOffset((v) => Math.max(0, v - 1))}
               className="px-3 py-2 border rounded-xl"
-              title="ไปรอบถัดไป"
+              title={locale === "en-US" ? "Next cycle" : "ไปรอบถัดไป"}
             >
               ▶
             </button>
@@ -129,20 +145,28 @@ export default function Reports() {
         ) : (
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <label className="text-sm">จาก</label>
+              <label className="text-sm">
+                {locale === "en-US" ? "From" : "จาก"}
+              </label>
               <input
                 type="date"
                 value={custom.from}
-                onChange={(e) => setCustom((s) => ({ ...s, from: e.target.value }))}
+                onChange={(e) =>
+                  setCustom((s) => ({ ...s, from: e.target.value }))
+                }
                 className="border rounded-xl px-3 py-2"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm">ถึง</label>
+              <label className="text-sm">
+                {locale === "en-US" ? "To" : "ถึง"}
+              </label>
               <input
                 type="date"
                 value={custom.to}
-                onChange={(e) => setCustom((s) => ({ ...s, to: e.target.value }))}
+                onChange={(e) =>
+                  setCustom((s) => ({ ...s, to: e.target.value }))
+                }
                 className="border rounded-xl px-3 py-2"
               />
             </div>
@@ -150,28 +174,47 @@ export default function Reports() {
         )}
 
         <div className="flex items-center justify-end">
-          <button onClick={exportCSV} className="px-4 py-2 bg-black text-white rounded-2xl">
-            Export CSV
+          <button
+            onClick={exportCSV}
+            className="px-4 py-2 bg-black text-white rounded-2xl"
+          >
+            {locale === "en-US" ? "Export CSV" : "Export CSV"}
           </button>
         </div>
       </div>
 
-      {/* Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Metric title="งบรวม" value={thb.format(totals.budget)} />
-        <Metric title="ใช้ไปแล้ว" value={thb.format(totals.spent)} />
-        <Metric title="คงเหลือ" value={thb.format(remain)} danger={remain < 0} />
+        <Metric
+          title={locale === "en-US" ? "Total Budget" : "งบรวม"}
+          value={thb.format(totals.budget)}
+        />
+        <Metric
+          title={locale === "en-US" ? "Spent" : "ใช้ไปแล้ว"}
+          value={thb.format(totals.spent)}
+        />
+        <Metric
+          title={locale === "en-US" ? "Remaining" : "คงเหลือ"}
+          value={thb.format(remain)}
+          danger={remain < 0}
+        />
       </div>
 
-      {/* Table */}
       <div className="rounded-2xl border bg-white p-4 overflow-auto">
         <table className="w-full text-sm">
           <thead className="text-left">
             <tr>
-              <th className="py-2 pr-4">หมวดหมู่</th>
-              <th className="py-2 pr-4">งบ (บาท)</th>
-              <th className="py-2 pr-4">ใช้จริง (บาท)</th>
-              <th className="py-2 pr-4">คงเหลือ (บาท)</th>
+              <th className="py-2 pr-4">
+                {locale === "en-US" ? "Category" : "หมวดหมู่"}
+              </th>
+              <th className="py-2 pr-4">
+                {locale === "en-US" ? "Budget (THB)" : "งบ (บาท)"}
+              </th>
+              <th className="py-2 pr-4">
+                {locale === "en-US" ? "Spent (THB)" : "ใช้จริง (บาท)"}
+              </th>
+              <th className="py-2 pr-4">
+                {locale === "en-US" ? "Remaining (THB)" : "คงเหลือ (บาท)"}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -180,7 +223,11 @@ export default function Reports() {
                 <td className="py-2 pr-4">{r.name}</td>
                 <td className="py-2 pr-4">{thb.format(r.budget)}</td>
                 <td className="py-2 pr-4">{thb.format(r.spent)}</td>
-                <td className={`py-2 pr-4 ${r.remain < 0 ? "text-red-600 font-medium" : ""}`}>
+                <td
+                  className={`py-2 pr-4 ${
+                    r.remain < 0 ? "text-red-600 font-medium" : ""
+                  }`}
+                >
                   {thb.format(r.remain)}
                 </td>
               </tr>
@@ -188,7 +235,9 @@ export default function Reports() {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={4} className="py-3 text-gray-500">
-                  ไม่พบข้อมูลในช่วงที่เลือก
+                  {locale === "en-US"
+                    ? "No data in selected range"
+                    : "ไม่พบข้อมูลในช่วงที่เลือก"}
                 </td>
               </tr>
             )}
@@ -201,7 +250,11 @@ export default function Reports() {
 
 function Metric({ title, value, danger }) {
   return (
-    <div className={`rounded-2xl border bg-white p-4 ${danger ? "text-red-600" : ""}`}>
+    <div
+      className={`rounded-2xl border bg-white p-4 ${
+        danger ? "text-red-600" : ""
+      }`}
+    >
       <div className="text-xs mb-1">{title}</div>
       <div className="text-2xl font-bold">{value}</div>
     </div>
