@@ -1,0 +1,31 @@
+﻿{
+  "project": "Expense Tracker v2",
+  "repo": "https://github.com/totsaphonk/Expense-Tracker-v2",
+  "timezone": "Asia/Bangkok",
+  "language": "th",
+  "stack": {
+    "frontend": "Vite + React",
+    "charts": "Recharts",
+    "persistence": "LocalStorage-first; SQLite (sql.js via npm) planned",
+    "pwa": "disabled for now"
+  },
+  "features_done": [
+    "Dashboard",
+    "AddExpense",
+    "Expenses",
+    "Reports (CSV export, cycle/custom)",
+    "Settings (cycle start, categories/budgets, backup/restore JSON)",
+    "Recurring (manual apply + auto-apply at startup)"
+  ],
+  "decisions": [
+    "Avoid sql.js via CDN; switch to npm + local wasm later",
+    "Keep engine API stable for easy swap",
+    "Use patches or full files for changes"
+  ],
+  "next_tasks": [
+    "Recurring: edit/update templates",
+    "SQLite enablement + migration",
+    "PWA manifest & icons"
+  ],
+  "last_updated": "2025-08-23"
+}
