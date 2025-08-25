@@ -7,7 +7,6 @@ const LANGS = [
   { value: "en-US", label: "English" },
 ];
 
-// helpers for money input
 const onlyDigitsAndDot = (s) => s.replace(/[^\d.]/g, "");
 const toNumber = (s) => {
   if (s === "" || s == null) return NaN;
@@ -33,7 +32,6 @@ export default function Settings() {
     locale: settings?.locale ?? "th-TH",
   }));
 
-  // keep raw inputs for budget with formatted commas
   const [cats, setCats] = useState(() =>
     (categories ?? []).map((c) => ({
       ...c,
@@ -45,10 +43,9 @@ export default function Settings() {
   );
 
   if (!ready) return <div className="p-6 text-gray-500">กำลังโหลด…</div>;
-  const t = (th, en) =>
-    (local.locale || settings?.locale) === "en-US" ? en : th;
+  const isEN = (local.locale || settings?.locale) === "en-US";
+  const t = (th, en) => (isEN ? en : th);
 
-  // ---- actions ----
   function addCategory() {
     const id = `${Date.now().toString(36)}_${Math.random()
       .toString(36)
@@ -70,17 +67,10 @@ export default function Settings() {
     setCats((prev) => prev.filter((c) => c.id !== id));
   }
 
-  // validate & save
   function saveAll(e) {
     e.preventDefault();
-
-    // 1) day 1–31
     const day = Math.min(31, Math.max(1, Number(local.cycleStartDay || 1)));
 
-    // 2) normalize + validate categories
-    // - required: name not empty
-    // - required: budget is a number >= 0
-    // - no duplicate names (trim/case-insensitive)
     const normalized = [];
     const nameSet = new Set();
     for (const c of cats) {
@@ -117,7 +107,6 @@ export default function Settings() {
       });
     }
 
-    // 3) save settings & categories
     setSettings((s) => ({
       ...s,
       cycleStartDay: day,
@@ -128,7 +117,6 @@ export default function Settings() {
     alert(t("บันทึกการตั้งค่าเรียบร้อยแล้ว", "Settings saved successfully"));
   }
 
-  // ---- render ----
   return (
     <section className="mt-4 space-y-4">
       <form
@@ -186,91 +174,155 @@ export default function Settings() {
 
         <div className="grid grid-cols-1 gap-2">
           {cats.map((c) => (
-            <div
-              key={c.id}
-              className="rounded-xl border p-3 flex items-center gap-3"
-            >
-              {/* name (flex-grow) */}
-              <input
-                value={c.name}
-                onChange={(e) =>
-                  setCats((prev) =>
-                    prev.map((x) =>
-                      x.id === c.id ? { ...x, name: e.target.value } : x
+            <div key={c.id} className="rounded-xl border p-3">
+              {/* บรรทัดบน: ชื่อ (เต็มแถวในมือถือ) */}
+              <div className="grid grid-cols-12 gap-3 items-center">
+                <input
+                  value={c.name}
+                  onChange={(e) =>
+                    setCats((prev) =>
+                      prev.map((x) =>
+                        x.id === c.id ? { ...x, name: e.target.value } : x
+                      )
                     )
-                  )
-                }
-                className="border rounded-xl px-3 py-2 flex-1 min-w-[180px]"
-                placeholder={t("ชื่อหมวด", "Category name")}
-              />
+                  }
+                  className="border rounded-xl px-3 py-2 col-span-12 md:col-span-6"
+                  placeholder={t("ชื่อหมวด", "Category name")}
+                />
 
-              {/* budget (fixed width, with commas) */}
-              <input
-                inputMode="decimal"
-                value={c._budgetInput}
-                onChange={(e) => {
-                  const raw = onlyDigitsAndDot(e.target.value);
-                  // format on the fly (commas). We avoid NaN like "."
-                  const n = toNumber(raw);
-                  setCats((prev) =>
-                    prev.map((x) =>
-                      x.id === c.id
-                        ? {
+                {/* บรรทัดล่าง (มือถือ): งบ / สี / ลบ */}
+                <div className="col-span-12 grid grid-cols-12 gap-3 md:hidden mt-2">
+                  <input
+                    inputMode="decimal"
+                    value={c._budgetInput}
+                    onChange={(e) => {
+                      const raw = onlyDigitsAndDot(e.target.value);
+                      const n = toNumber(raw);
+                      setCats((prev) =>
+                        prev.map((x) =>
+                          x.id === c.id
+                            ? {
+                                ...x,
+                                _budgetInput:
+                                  raw === ""
+                                    ? ""
+                                    : formatMoney(
+                                        Number.isFinite(n)
+                                          ? n
+                                          : toNumber(raw.slice(0, -1))
+                                      ),
+                              }
+                            : x
+                        )
+                      );
+                    }}
+                    onBlur={() => {
+                      setCats((prev) =>
+                        prev.map((x) => {
+                          if (x.id !== c.id) return x;
+                          const n = toNumber(x._budgetInput);
+                          return {
                             ...x,
-                            _budgetInput:
-                              raw === ""
-                                ? ""
-                                : formatMoney(
-                                    Number.isFinite(n)
-                                      ? n
-                                      : toNumber(raw.slice(0, -1))
-                                  ),
-                          }
-                        : x
-                    )
-                  );
-                }}
-                onBlur={() => {
-                  // final format
-                  setCats((prev) =>
-                    prev.map((x) => {
-                      if (x.id !== c.id) return x;
-                      const n = toNumber(x._budgetInput);
-                      return {
-                        ...x,
-                        _budgetInput: Number.isFinite(n) ? formatMoney(n) : "",
-                      };
-                    })
-                  );
-                }}
-                className="border rounded-xl px-3 py-2 w-32 md:w-40 text-right"
-                placeholder={t("งบ (บาท)", "Budget")}
-              />
+                            _budgetInput: Number.isFinite(n)
+                              ? formatMoney(n)
+                              : "",
+                          };
+                        })
+                      );
+                    }}
+                    className="border rounded-xl px-3 py-2 text-right col-span-6"
+                    placeholder={t("งบ (บาท)", "Budget")}
+                  />
 
-              {/* color (picker only, small) */}
-              <input
-                type="color"
-                value={c.color || "#000000"}
-                onChange={(e) =>
-                  setCats((prev) =>
-                    prev.map((x) =>
-                      x.id === c.id ? { ...x, color: e.target.value } : x
-                    )
-                  )
-                }
-                className="h-10 w-10 p-1 rounded"
-                title={t("เลือกสีหมวดหมู่", "Pick category color")}
-              />
+                  <input
+                    type="color"
+                    value={c.color || "#000000"}
+                    onChange={(e) =>
+                      setCats((prev) =>
+                        prev.map((x) =>
+                          x.id === c.id ? { ...x, color: e.target.value } : x
+                        )
+                      )
+                    }
+                    className="h-10 w-full p-1 rounded col-span-2"
+                    title={t("เลือกสีหมวดหมู่", "Pick category color")}
+                  />
 
-              {/* delete (align right) */}
-              <div className="ml-auto">
-                <button
-                  type="button"
-                  onClick={() => removeCategory(c.id)}
-                  className="px-3 py-2 border rounded-xl"
-                >
-                  {t("ลบ", "Delete")}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => removeCategory(c.id)}
+                    className="px-3 py-2 border rounded-xl col-span-4 touch-manipulation"
+                  >
+                    {t("ลบ", "Delete")}
+                  </button>
+                </div>
+
+                {/* โหมดเดสก์ท็อป: เรียงในบรรทัดเดียว */}
+                <input
+                  inputMode="decimal"
+                  value={c._budgetInput}
+                  onChange={(e) => {
+                    const raw = onlyDigitsAndDot(e.target.value);
+                    const n = toNumber(raw);
+                    setCats((prev) =>
+                      prev.map((x) =>
+                        x.id === c.id
+                          ? {
+                              ...x,
+                              _budgetInput:
+                                raw === ""
+                                  ? ""
+                                  : formatMoney(
+                                      Number.isFinite(n)
+                                        ? n
+                                        : toNumber(raw.slice(0, -1))
+                                    ),
+                            }
+                          : x
+                      )
+                    );
+                  }}
+                  onBlur={() => {
+                    setCats((prev) =>
+                      prev.map((x) => {
+                        if (x.id !== c.id) return x;
+                        const n = toNumber(x._budgetInput);
+                        return {
+                          ...x,
+                          _budgetInput: Number.isFinite(n)
+                            ? formatMoney(n)
+                            : "",
+                        };
+                      })
+                    );
+                  }}
+                  className="border rounded-xl px-3 py-2 w-full text-right hidden md:block md:col-span-3"
+                  placeholder={t("งบ (บาท)", "Budget")}
+                />
+
+                <input
+                  type="color"
+                  value={c.color || "#000000"}
+                  onChange={(e) =>
+                    setCats((prev) =>
+                      prev.map((x) =>
+                        x.id === c.id ? { ...x, color: e.target.value } : x
+                      )
+                    )
+                  }
+                  className="h-10 w-10 p-1 rounded hidden md:block md:col-span-1"
+                  title={t("เลือกสีหมวดหมู่", "Pick category color")}
+                />
+
+                <div className="hidden md:flex md:col-span-2 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => removeCategory(c.id)}
+                    className="px-3 py-2 border rounded-xl touch-manipulation"
+                  >
+                    {t("ลบ", "Delete")}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -293,6 +345,7 @@ export default function Settings() {
         </div>
       </form>
 
+      {/* Backup / Restore (เดิม) */}
       <div className="rounded-2xl border bg-white p-4 space-y-3">
         <h3 className="font-semibold">
           {t("สำรองข้อมูล / กู้คืน", "Backup / Restore")}
@@ -324,7 +377,6 @@ export default function Settings() {
     </section>
   );
 
-  // ---- backup helpers (unchanged) ----
   function downloadBackup() {
     const backupJson = JSON.stringify(
       { settings, categories, expenses, recurrings },

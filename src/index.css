@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* รองรับ safe area บน iPhone (ถ้าอยากใช้ใน App.jsx) */
+/* Safe area สำหรับ iPhone (Dynamic Island / Notch) */
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -13,6 +13,8 @@
 .safe-bottom {
   padding-bottom: var(--safe-bottom);
 }
+
+/* เอกสารเต็มจอ + คุมสกรอลล์ */
 html,
 body,
 #root {
@@ -21,6 +23,27 @@ body,
 body {
   overscroll-behavior-y: contain;
 }
-button {
+
+/* ป้องกัน iOS auto-zoom */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ลด double-tap zoom / gesture แปลก ๆ */
+button,
+a,
+[role="button"] {
   touch-action: manipulation;
-} /* กัน double-tap zoom */
+}
+
+/* ===== THEME: น้ำเงิน-ขาวบนพื้นหลังเข้ม ===== */
+/* พื้นหลังหลักของทั้งแอป (สำคัญเวลาไม่มี wrapper) */
+body {
+  background-color: #0d1b2a; /* navy-very-dark */
+  color: #ffffff;
+}
+
+/* ปรับตาราง/อินพุตบนการ์ดให้ดูเรียบร้อยในพื้นหลังขาว */
+.card {
+  @apply rounded-2xl border bg-white p-4;
+}

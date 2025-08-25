@@ -1,17 +1,27 @@
 // src/app/App.jsx
 import React, { useState } from "react";
-import { AppProvider, useApp } from "../data/app-state";
+import { AppProvider } from "../data/app-state";
 
 import Dashboard from "../features/Dashboard";
 import AddExpense from "../features/AddExpense";
 import Expenses from "../features/Expenses";
-import Reports from "../features/Reports";
-import Settings from "../features/Settings";
 import Recurring from "../features/Recurring";
-
+import Settings from "../features/Settings";
 import Landing from "./Landing";
 import Shell from "./Shell";
 import { useI18n } from "../i18n";
+
+// ✅ ไอคอน modern จาก lucide-react
+import {
+  LayoutDashboard,
+  PlusCircle,
+  ListChecks,
+  RefreshCw,
+  Settings as SettingsIcon,
+} from "lucide-react";
+
+// ✅ กำหนดชื่อโปรแกรมตรงนี้ครั้งเดียว
+const APP_TITLE = "Expense Tracker";
 
 export default function App() {
   return (
@@ -22,41 +32,66 @@ export default function App() {
 }
 
 function AppInner() {
-  // stage: 'landing' | tab keys
+  // stage: 'landing' | 'app'
   const [stage, setStage] = useState("landing");
-  const [tab, setTab] = useState("dashboard");
+  // แท็บ (พิมพ์ใหญ่ตามที่คุณตั้ง)
+  const [tab, setTab] = useState("Dashboard");
   const t = useI18n();
 
   const TABS = [
-    { k: "dashboard", label: t("menu.dashboard"), icon: "📊" },
-    { k: "add", label: t("menu.add"), icon: "➕" },
-    { k: "expenses", label: t("menu.expenses"), icon: "📑" },
-    { k: "recurring", label: t("menu.recurring"), icon: "🔄" },
-    { k: "reports", label: t("menu.reports"), icon: "📈" },
-    { k: "settings", label: t("menu.settings"), icon: "⚙" },
+    {
+      k: "Dashboard",
+      label: t("menu_dashboard"),
+      icon: <LayoutDashboard className="w-5 h-5" />,
+    },
+    {
+      k: "Add",
+      label: t("menu_add"),
+      icon: <PlusCircle className="w-5 h-5" />,
+    },
+    {
+      k: "Expenses",
+      label: t("menu_expenses"),
+      icon: <ListChecks className="w-5 h-5" />,
+    },
+    {
+      k: "Recurring",
+      label: t("menu_recurring"),
+      icon: <RefreshCw className="w-5 h-5" />,
+    },
+    {
+      k: "Settings",
+      label: t("menu_settings"),
+      icon: <SettingsIcon className="w-5 h-5" />,
+    },
   ];
 
   if (stage === "landing") {
     return (
       <Landing
         tabs={TABS}
+        title={APP_TITLE}
         onPick={(k) => {
           setTab(k);
           setStage("app");
         }}
-        title={t("app.title")}
       />
     );
   }
 
   return (
-    <Shell title={t("app.title")} tabs={TABS} active={tab} onSelect={setTab}>
-      {tab === "dashboard" && <Dashboard />}
-      {tab === "add" && <AddExpense />}
-      {tab === "expenses" && <Expenses />}
-      {tab === "recurring" && <Recurring />}
-      {tab === "reports" && <Reports />}
-      {tab === "settings" && <Settings />}
+    <Shell
+      title={APP_TITLE}
+      tabs={TABS}
+      active={tab}
+      onSelect={setTab}
+      onBackHome={() => setStage("landing")}
+    >
+      {tab === "Dashboard" && <Dashboard />}
+      {tab === "Add" && <AddExpense />}
+      {tab === "Expenses" && <Expenses />}
+      {tab === "Recurring" && <Recurring />}
+      {tab === "Settings" && <Settings />}
     </Shell>
   );
 }

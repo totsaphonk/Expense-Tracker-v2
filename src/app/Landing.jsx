@@ -1,65 +1,107 @@
 // src/app/Landing.jsx
 import React from "react";
+import {
+  LayoutDashboard,
+  PlusCircle,
+  ListChecks,
+  RefreshCw,
+  Settings as SettingsIcon,
+} from "lucide-react";
 
-export default function Landing({ tabs, onPick, title }) {
+const TAB_COLORS = {
+  Dashboard: "bg-indigo-500",
+  Add: "bg-emerald-500",
+  Expenses: "bg-sky-500",
+  Recurring: "bg-violet-500",
+  Settings: "bg-amber-500",
+};
+
+export default function Landing({
+  title = "Monthly Expense Helper — v2",
+  tabs = [],
+  onPick,
+}) {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b safe-top">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-black text-white grid place-items-center font-semibold">
-            ฿
-          </div>
-          <h1 className="text-lg font-bold">{title}</h1>
+    <div className="min-h-screen text-white bg-[#0d1b2a] flex flex-col">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b2545]/90 backdrop-blur safe-top">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-3">
+          <img
+            src="/logo-mark.png"
+            alt="Logo"
+            className="w-12 h-12 rounded-xl object-contain"
+          />
+          <h1 className="font-bold text-lg">Expense Tracker</h1>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-10">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold">เมนู</h2>
-          <p className="text-gray-500 text-sm">
-            เลือกเมนูที่ต้องการเริ่มใช้งาน (สามารถเปลี่ยนได้ภายหลัง)
+      <main className="flex-1">
+        <div className="max-w-6xl mx-auto px-4 pt-6 pb-24 safe-bottom">
+          <h2 className="text-xl font-semibold mb-1">Main Menu</h2>
+          <p className="text-white/70 text-sm mb-4">
+            เลือกเมนูเพื่อเริ่มใช้งาน — โทนน้ำเงิน–ขาวบนพื้นหลังเข้ม
           </p>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tabs.map((t) => (
-            <button
-              key={t.k}
-              onClick={() => onPick(t.k)}
-              className="group text-left rounded-2xl border bg-white hover:shadow-lg transition-all p-5 flex items-start gap-4"
-            >
-              <div className="text-3xl leading-none">{t.icon}</div>
-              <div>
-                <div className="font-semibold group-hover:underline">
-                  {t.label}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {tabs.map((t) => (
+              <button
+                key={t.k}
+                onClick={() => onPick?.(t.k)}
+                className="rounded-2xl border border-black/5 bg-white text-[#0b1220] p-4 text-left hover:shadow-lg transition shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`w-10 h-10 grid place-items-center rounded-xl ${
+                      TAB_COLORS[t.k] || "bg-indigo-500"
+                    }`}
+                  >
+                    {iconFor(t.k)}
+                  </span>
+                  <div>
+                    <div className="font-semibold">{t.label}</div>
+                    <div className="text-xs text-gray-500">
+                      {subtitleFor(t.k)}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {/* คำอธิบายสั้น ๆ ต่อเมนู (ตัวอย่าง) */}
-                  {descFor(t.k)}
-                </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
       </main>
     </div>
   );
 }
 
-function descFor(key) {
-  switch (key) {
-    case "dashboard":
-      return "สรุปภาพรวมงบและการใช้จ่ายในรอบนี้";
-    case "add":
+function iconFor(k) {
+  const cls = "w-6 h-6 text-white";
+  switch (k) {
+    case "Dashboard":
+      return <LayoutDashboard className={cls} />;
+    case "Add":
+      return <PlusCircle className={cls} />;
+    case "Expenses":
+      return <ListChecks className={cls} />;
+    case "Recurring":
+      return <RefreshCw className={cls} />;
+    case "Settings":
+      return <SettingsIcon className={cls} />;
+    default:
+      return <LayoutDashboard className={cls} />;
+  }
+}
+
+function subtitleFor(k) {
+  switch (k) {
+    case "Dashboard":
+      return "ภาพรวม + KPI ของงบประมาณ";
+    case "Add":
       return "เพิ่มรายการใช้จ่ายใหม่อย่างรวดเร็ว";
-    case "expenses":
-      return "ดู/แก้ไข/ค้นหารายการทั้งหมด";
-    case "recurring":
-      return "ตั้งค่ารายการประจำ ให้ระบบสร้างให้อัตโนมัติ";
-    case "reports":
-      return "สรุปผลตามหมวด/ช่วงเวลา และ Export CSV";
-    case "settings":
-      return "ตั้งค่าวันตัดรอบ ภาษา และหมวดหมู่";
+    case "Expenses":
+      return "ค้นหา/สรุปรายการ + Export CSV";
+    case "Recurring":
+      return "ตั้งค่ารายการประจำ (เช่น ค่าเน็ต/ผ่อน)";
+    case "Settings":
+      return "ภาษา, รอบตัดงบ, หมวดหมู่ & สำรองข้อมูล";
     default:
       return "";
   }
