@@ -6,7 +6,9 @@
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --bottom-nav-height: 80px; /* ความสูงมาตรฐานของ bottom nav */
 }
+
 .safe-top {
   padding-top: var(--safe-top);
 }
@@ -22,6 +24,8 @@ body,
 }
 body {
   overscroll-behavior-y: contain;
+  background-color: #0d1b2a; /* navy-very-dark */
+  color: #ffffff;
 }
 
 /* ป้องกัน iOS auto-zoom */
@@ -38,12 +42,44 @@ a,
 
 /* ===== THEME: น้ำเงิน-ขาวบนพื้นหลังเข้ม ===== */
 /* พื้นหลังหลักของทั้งแอป (สำคัญเวลาไม่มี wrapper) */
-body {
-  background-color: #0d1b2a; /* navy-very-dark */
-  color: #ffffff;
-}
-
-/* ปรับตาราง/อินพุตบนการ์ดให้ดูเรียบร้อยในพื้นหลังขาว */
 .card {
   @apply rounded-2xl border bg-white p-4;
+}
+
+/* bottom nav bar — โค้งขึ้นตรงกลาง + ปุ่มกลางยกสูง */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0b2545; /* แถบสีน้ำเงินเข้ม */
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  height: var(--bottom-nav-height);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 50;
+}
+
+/* ปุ่มกลาง (FAB) */
+.fab {
+  border: 3px solid #0b2545; /* วาดขอบให้กลืนกับแถบ */
+}
+
+/* ปุ่มไอคอนซ้าย-ขวา */
+.nav-btn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  opacity: 0.9;
+}
+.nav-btn:active {
+  opacity: 1;
+}
+
+/* Content area ให้ไม่โดน nav ทับ */
+.app-content {
+  padding-bottom: calc(
+    var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 16px
+  );
 }
